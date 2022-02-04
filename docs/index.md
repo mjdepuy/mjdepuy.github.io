@@ -10,5 +10,4 @@ If you are coming to this page looking for guru-level advice, you may not find i
 I did maintain a site on Blogspot, but that has been decomissioned. Post that used to reside there are now here. At the time of writing this intro, GitHub pages is new to me, so I apologize for using a default template. :)
 
 # Posts
-### [This is a link to test post 1!](./posts/test_post_1.md)
-### [This is a link to test post two!](./posts/test_post_2.md)
+### Happy Little Maldocs [Orig Dec 2018]
