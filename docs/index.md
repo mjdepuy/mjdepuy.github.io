@@ -10,4 +10,4 @@ If you are coming to this page looking for guru-level advice, you may not find i
 I did maintain a site on Blogspot, but that has been decomissioned. Post that used to reside there are now here. At the time of writing this intro, GitHub pages is new to me, so I apologize for using a default template. :)
 
 # Posts
-### Happy Little Maldocs [Orig Dec 2018]
+### [Happy Little Maldocs](/posts/happy_maldocs.md) [Orig Dec 2018]
