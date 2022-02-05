@@ -35,7 +35,7 @@ Once extracted, use Eric Zimmerman's [MFTEcmd](https://ericzimmerman.github.io/)
 
 Same as the last question, only we need to search for the filename instead of the entry number.
 
-![](/assets/images/defcon_ctf_2018/hr_basic_4a.jpg")
+![](/assets/images/defcon_ctf_2018/hr_basic_4a.jpg)
 
 *Answer:* `115322`
 
