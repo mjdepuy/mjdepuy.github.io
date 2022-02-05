@@ -11,3 +11,4 @@ I did maintain a site on Blogspot, but that has been decomissioned. Post that us
 
 # Posts
 ### [Happy Little Maldocs](/posts/happy_maldocs.md) [Orig Dec 2018]
+### [DefCon DFIR CTF 2018 - HR Server](/posts/defcon_ctf_hr_server.md) [Orig Jan 2019]

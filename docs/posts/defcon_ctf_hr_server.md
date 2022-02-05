@@ -6,17 +6,21 @@ There are 3 images. The first image is an HR server, the second is a file server
 
 ### HR Server - Basic
 *1) Which software was used to image the HR Server?*
+
 This is pretty easy to do. The [SANS SIFT Workstation](https://digital-forensics.sans.org/community/downloads") comes with `libewf`. Using `ewfinfo`, we can look at the imaging information of the E01 file.
 
 ![](/assets/images/defcon_ctf_2018/hr_basic_1a.jpg)
+
 *Answer:* `X-Ways Forensics`
 
 *2) What version of the software was used to image the HR server?*
+
 Looking at the previous screenshot, we can see the version of the software that was used.
 
 *Answer:* `19.6`
 
 *3) What is the file name that represent MFT Entry 168043?*
+
 To perform this task, we can use FTK Imager to extract the $MFT file from the HR Server image.
 
 ![](/assets/images/defcon_ctf_2018/hr_basic_3a.jpg)
@@ -28,6 +32,7 @@ Once extracted, use Eric Zimmerman's [MFTEcmd](https://ericzimmerman.github.io/)
 *Answer:* `pip3.7.exe`
 
 *4) What is the MFT Entry number of the following file? \xampp\mysql\bin\mysql.exe*
+
 Same as the last question, only we need to search for the filename instead of the entry number.
 
 ![](/assets/images/defcon_ctf_2018/hr_basic_4a.jpg")
@@ -35,6 +40,7 @@ Same as the last question, only we need to search for the filename instead of th
 *Answer:* `115322`
 
 *5) What is the MFT Attribute ID of the named $J data attribute for the MFT Entry with a file name of $UsnJrnl?*
+
 This attribute is not parsed out by MFTEcmd and is a bit more difficult and will require a little math. In the MFT, each record is 1024 bytes in length. The entry number for the $UsnJrnl is 108606. We can multiply that by 1024 bytes and get the offset in the MFT where the record lies. Let's take a look using our handy hex editor! (We are going to use [HxD](https://mh-nexus.de/en/hxd/")) It has a feature that will allow us to plug in the offset and take us directly to the beginning of the file's record.
 
 ```
@@ -48,6 +54,7 @@ Here is the record we are looking for. Highlighted in red, you will see the byte
 *Answer:* `3`
 
 *6) At 2018-08-08 18:10:38.554 (UTC) what was the IP address of the the client that attempted to access SMB via an anonymous logon?*
+
 A good place to look for SMB traffic given a hard drive image is the SMB Security event log. Here, we can look for attempted SMB session authentications. Using FTK Imager, we can pull out the Security event log and look for SMB session authentication errors (event code 551). Since I am on the west coast, my timezone puts me at UTC-7, hence the timestamp difference in the picture.
 
 ![](/assets/images/defcon_ctf_2018/hr_basic_6a.jpg)
@@ -55,6 +62,7 @@ A good place to look for SMB traffic given a hard drive image is the SMB Securit
 *Answer:* `80.81.110.50`
 
 *7) What was the name of the batch file saved by mpowers?*
+
 As evidenced by the SANS Windows Forensics poster, a good place to look for recently accessed files is the `OpenSaveMRU` key in the user's `NTUSER.dat`. This key tracks the opening or saving of any file from the Windows shell dialog box by file type. One of the best tools to parse registry files is Eric Zimmerman's [Registry Explorer](https://ericzimmerman.github.io/). Once we open the `NTUSER.dat` file, we navigate to the following path: `NTUSER.dat\Software\Microsoft\Windows\CurrentVersion\Explorer\Comdlg32\OpenSavePidMRU\bat`.
 
 ![](/assets/images/defcon_ctf_2018/hr_basic_7a.jpg)
@@ -66,11 +74,13 @@ Here we find the `MRUListEx` subkey. This tells us in which order the files were
 *Answer:* `c:\Production\update_app.bat`
 
 *8) What is the name of the hr management application that hosts a web server?*
+
 Perusing the `Program Files` directory, we can see that `OrangeHRM` stands out in the list. Google confirms that this is an HR solution.
 
 *Answer:* `OrangeHRM`
 
 *9) What was the public url for the HR system’s portal?*
+
 First, we need to get the IP address of the server. Easiest way to do this is to look at the `SYSTEM` registry hive. Using that information, we can comb the OrangeHRM server's `access.log` file for the IP address and the URL for the login page.
 
 ![](/assets/images/defcon_ctf_2018/hr_basic_8a.jpg)
@@ -80,11 +90,13 @@ First, we need to get the IP address of the server. Easiest way to do this is to
 *Answer:* `http://74.118.139.108/symfony/web/index.php/auth/login`
 
 *10) What is name of the file that had a change recorded with an update sequence number of 368701440?*
+
 `MFTEcmd` parses out the update sequence number from the MFT for us. Searching for the number, we get:
 
 *Answer:* `Microsoft-WIndows-SMBServer%4Security.evtx`
 
 *11) What is the name of the deleted file with a reference number of 12947848928752043?*
+
 This one stumped me for a good while. Google does not return many results when look for `MFT file reference number`. Recently (5 December 2018), David Cowen on the Forensic Lunch regularly hosts a "Test Kitchen". In this episode, he was looking at a file that is sometimes resident on Windows 7 machines called the `syscache.hve`. This file houses a `_FileID_` attribute that is very similar to a file reference number. This gave me the idea to look at the Windows Internals books (6e. Part 2), specifically at the MFT section. A subsection on File Record Numbers tell us that a number consists of 8 bytes, or 64 bits. The first 16 bits is the Sequence Number. The last 48 bits are the MFT number. That leads us to believe that the file reference number is a decimal representation of the sequence and entry numbers OR'd together. To convert the decimal reference number to a sequence number and MFT entry number, we must first convert the given reference number to hex. The hex number is only 7 bytes long, so we must prepend a 00 to the front. Then take the first two bytes and the last 6 bytes, and convert each to decimal. You now have the sequence and MFT entry numbers.
 
 ```
