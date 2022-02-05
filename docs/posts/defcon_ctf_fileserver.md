@@ -86,7 +86,7 @@ The UserAssist key keeps track of any application that the user launched by clic
 
 ![](/assets/images/defcon_ctf_2018/fs_basic_8a.png)
 
-![](/assets/images/defcon_ctf_2018/fs_basic_8b.png
+![](/assets/images/defcon_ctf_2018/fs_basic_8b.png)
 
 ![](/assets/images/defcon_ctf_2018/fs_basic_8c.png)
 
@@ -204,7 +204,7 @@ We cannot access the DropBox the files were exfiltrated to, and we do not have a
 
 ![](/assets/images/defcon_ctf_2018/fs_adv_8a.png)
 
-A great tool to parse these files with is [ANSSI-FR's](https://github.com/ANSSI-FR/bmc-tools)`bmc-tools.py` script. This will parse the RDP Bitmap Cache file and extract thumbnails into a defined directory. These images are not ordered in anyway, and there are a LOT of them, so it takes some time to go through.
+A great tool to parse these files with is [ANSSI-FR's](https://github.com/ANSSI-FR/bmc-tools) `bmc-tools.py` script. This will parse the RDP Bitmap Cache file and extract thumbnails into a defined directory. These images are not ordered in anyway, and there are a LOT of them, so it takes some time to go through.
 
 ![](/assets/images/defcon_ctf_2018/fs_adv_8b.png)
 
